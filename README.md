@@ -1,7 +1,19 @@
-global-politics
+eu-polarization
 ===============
 
+Setup
+-----
+
+Requires Python 3.
+
 ```
-mkvirtualenv global-politics
+mkvirtualenv eu-polarization
 pip install -r requirements.txt
+```
+
+Run
+---
+
+```
+python parl.py
 ```
