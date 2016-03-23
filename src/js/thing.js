@@ -135,7 +135,7 @@ var renderChart = function(config) {
 	 */
 	var xScale = d3.scale.linear()
 		.range([0, chartWidth])
-		.domain([0, 10]);
+		.domain([2.5, 7.5]);
 
 	var yScale = d3.scale.linear()
 		.range([chartHeight, 0])
