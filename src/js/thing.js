@@ -135,7 +135,7 @@ var renderChart = function(config) {
 	 */
 	var xScale = d3.scale.linear()
 		.range([0, chartWidth])
-		.domain([2.5, 7.5]);
+		.domain([2, 8]);
 
 	var yScale = d3.scale.linear()
 		.range([chartHeight, 0])
@@ -216,14 +216,14 @@ var renderChart = function(config) {
 
     chartElement.append('text')
         .attr('class', 'left')
-        .attr('x', xScale(4))
+        .attr('x', xScale(4.5))
         .attr('y', yScale(1982))
         .attr('text-anchor', 'end')
         .text('◀ Political left');
 
     chartElement.append('text')
         .attr('class', 'left')
-        .attr('x', xScale(6))
+        .attr('x', xScale(5.5))
         .attr('y', yScale(1982))
         .text('Political right ▶');
 
