@@ -8,44 +8,65 @@ var _ = require('lodash');
 var MOBILE_THRESHOLD = 600;
 
 var chartData = null;
-var dataSeries = [];
+var countrySelect = null;
+var currentChart = 'Austria';
 
 function init () {
-    d3.csv('./data/test.csv', function(err, data) {
-		chartData = formatData(data);
+    d3.json('./data/countries.json', function(err, data) {
+		chartData = data;
 
-        console.log(chartData);
+        countrySelect = d3.select('#countries');
+
+        countrySelect.selectAll("option")
+            .data(d3.keys(chartData))
+            .enter()
+            .append("option")
+            .attr("value", function (d) { return d; })
+            .text(function (d) { return d; });
+
+        countrySelect.on('change', onCountrySelectChange)
 
 		update();
 	});
 }
 
+var onCountrySelectChange = function() {
+    currentChart = d3.select(this).node().value;
+    update();
+}
+
 var formatData = function(data) {
-    data.forEach(function(d) {
-
-        for (var key in d) {
-            d[key] = +d[key];
-        }
-    });
-
     /*
      * Restructure tabular data for easier charting.
      */
+    var dataSeries = [];
+
     for (var column in data[0]) {
         if (column == 'year') {
             continue;
         }
 
+        var values = [];
+
+        for (var d in data) {
+            // Remove nulls
+            if (data[d][column] === null) {
+                continue;
+            }
+
+            values.push({
+                'year': data[d]['year'],
+                'value': data[d][column]
+            })
+        }
+
         dataSeries.push({
             'name': column,
-            'values': data.map(function(d) {
-                return {
-                    'year': d['year'],
-                    'value': d[column]
-                };
-            })
+            'values': values
         });
     }
+
+    return dataSeries;
 }
 
 function update () {
@@ -60,7 +81,7 @@ function update () {
 	renderChart({
 		container: '#chart',
 		width: width,
-		data: dataSeries
+		data: formatData(chartData[currentChart])
 	});
 
 	// adjust iframe for dynamic content
@@ -84,6 +105,8 @@ var renderChart = function(config) {
 		bottom: 25,
 		left: 50
 	};
+
+    console.log(config['data']);
 
     var aspectRatio = 1.2;
 
@@ -113,8 +136,6 @@ var renderChart = function(config) {
 	var xScale = d3.scale.linear()
 		.range([0, chartWidth])
 		.domain([0, 10]);
-
-    console.log(config['data'])
 
 	var yScale = d3.scale.linear()
 		.range([chartHeight, 0])
@@ -178,7 +199,6 @@ var renderChart = function(config) {
      var line = d3.svg.line()
         .interpolate('monotone')
         .x(function(d) {
-            console.log(d['value'], xScale(d['value']))
             return xScale(d['value']);
         })
         .y(function(d) {
@@ -196,14 +216,14 @@ var renderChart = function(config) {
 
     chartElement.append('text')
         .attr('class', 'left')
-        .attr('x', xScale(4.75))
+        .attr('x', xScale(4))
         .attr('y', yScale(1982))
         .attr('text-anchor', 'end')
         .text('◀ Political left');
 
     chartElement.append('text')
         .attr('class', 'left')
-        .attr('x', xScale(5.25))
+        .attr('x', xScale(6))
         .attr('y', yScale(1982))
         .text('Political right ▶');
 
@@ -215,9 +235,6 @@ var renderChart = function(config) {
         .append('path')
             .attr('class', function(d, i) {
                 return 'line ' + classify(d['name']);
-            })
-            .attr('stroke', function(d) {
-                // return colorScale(d['name']);
             })
             .attr('d', function(d) {
                 return line(d['values']);

@@ -46,64 +46,9 @@ EU_ELECTIONS_YEARS = [
 ]
 
 
-def eu_parliament(db):
+def eu_wide(db, election_type):
     """
     Aggregate data for EU parliamentary elections.
-    """
-    summary_rows = []
-    detail_rows = []
-
-    for year in EU_ELECTIONS_YEARS:
-        left_right_list = []
-        total_seats = 0
-
-        print(year)
-
-        for country in EU:
-            results = db.execute('\
-                SELECT party_name_english, seats, left_right \
-                FROM view_election \
-                WHERE country_name=? AND election_date LIKE ? AND election_type=?',
-                (country, '%s-%%' % year, 'ep')
-            )
-
-            for row in results:
-                party_name, seats, left_right = row
-
-                if not seats:
-                    continue
-
-                total_seats += seats
-
-                if not left_right:
-                    continue
-
-                left_right_list.extend([left_right] * seats)
-
-                for i in range(seats):
-                    detail_rows.append([year, country, party_name, left_right])
-
-        seats_with_score = len(left_right_list)
-        mean_score = statistics.mean(left_right_list)
-        median_score = statistics.median(left_right_list)
-        stdev_score = statistics.stdev(left_right_list)
-
-        summary_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
-
-    with open('output/eu_parliament.csv', 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
-        writer.writerows(summary_rows)
-
-    with open('output/eu_parliament_details.csv', 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(['year', 'country', 'party_name', 'left_right'])
-        writer.writerows(detail_rows)
-
-
-def eu_national_parliaments(db):
-    """
-    Aggregate data for all EU member-country national parliaments, as a group.
     """
     summary_rows = []
     detail_rows = []
@@ -121,7 +66,7 @@ def eu_national_parliaments(db):
                 WHERE country_name=? AND CAST(SUBSTR(election_date, 0, 5) AS INTEGER) < ? AND election_type=?
                 ORDER BY election_date DESC
                 ''',
-                (country, year, 'parliament')
+                (country, year, election_type)
             )
 
             try:
@@ -136,7 +81,7 @@ def eu_national_parliaments(db):
                 FROM view_election
                 WHERE country_name=? AND election_date=? AND election_type=?
                 ''',
-                (country, election_date, 'parliament')
+                (country, election_date, election_type)
             )
 
             for row in results:
@@ -162,83 +107,82 @@ def eu_national_parliaments(db):
 
         summary_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
 
-    with open('output/eu_national_parliaments.csv', 'w') as f:
+    with open('output/eu_wide_%s.csv' % election_type, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
         writer.writerows(summary_rows)
 
-    with open('output/eu_national_parliaments_details.csv', 'w') as f:
+    with open('output/eu_details_%s.csv' % election_type, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['year', 'country', 'party_name', 'left_right'])
         writer.writerows(detail_rows)
 
 
-def eu_countries(db):
+def eu_countries(db, election_type):
     """
     Aggregate data for individual EU member-country national parliaments.
     """
-    for election_type in ELECTION_TYPES:
-        print(election_type)
+    out_rows = []
 
-        out_rows = []
+    for country in EU:
+        print(country)
 
-        for country in EU:
-            print(country)
-
-            results = db.execute('\
-                SELECT DISTINCT election_date \
-                FROM view_election \
-                WHERE country_name=? AND election_type=? \
-                ORDER BY election_date DESC LIMIT 10',
-                (country, election_type)
+        for year in range(1980, 2016):
+            results = db.execute('''
+                SELECT DISTINCT election_date
+                FROM view_election
+                WHERE country_name=? AND CAST(SUBSTR(election_date, 0, 5) AS INTEGER) < ? AND election_type=?
+                ORDER BY election_date DESC
+                ''',
+                (country, year, election_type)
             )
-            most_recent = [row[0] for row in results]
 
-            for election_date in most_recent:
-                results = db.execute('\
-                    SELECT party_name_english, seats, seats_total, left_right \
-                    FROM view_election \
-                    WHERE country_name=? AND election_date=? AND election_type=?',
-                    (country, election_date, election_type)
-                )
+            try:
+                election_date = results.fetchone()[0]
+            except TypeError:
+                continue
 
-                left_right_list = []
+            results = db.execute('''
+                SELECT party_name_english, seats, seats_total, left_right
+                FROM view_election
+                WHERE country_name=? AND election_date=? AND election_type=?
+                ''',
+                (country, election_date, election_type)
+            )
 
-                for row in results:
-                    name, seats, seats_total, left_right = row
+            left_right_list = []
 
-                    if not seats:
-                        continue
+            for row in results:
+                name, seats, seats_total, left_right = row
 
-                    if not left_right:
-                        continue
+                if not seats:
+                    continue
 
-                    left_right_list.extend([left_right] * seats)
+                if not left_right:
+                    continue
 
-                seats_with_score = len(left_right_list)
-                mean_score = statistics.mean(left_right_list)
-                median_score = statistics.median(left_right_list)
-                stdev_score = statistics.stdev(left_right_list)
+                left_right_list.extend([left_right] * seats)
 
-                out_rows.append([country, election_date, seats_with_score, seats_total, mean_score, median_score, stdev_score])
+            seats_with_score = len(left_right_list)
+            mean_score = statistics.mean(left_right_list)
+            median_score = statistics.median(left_right_list)
+            stdev_score = statistics.stdev(left_right_list)
 
-        with open('output/eu_countries_%s.csv' % election_type, 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(['country', 'election_date', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev'])
-            writer.writerows(out_rows)
+            out_rows.append([country, year, seats_with_score, seats_total, mean_score, median_score, stdev_score])
 
-
-def make_json():
-    pass
+    with open('output/eu_countries_%s.csv' % election_type, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['country', 'year', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev'])
+        writer.writerows(out_rows)
 
 
 def main():
     db = sqlite.connect('data/parlgov-stable.db')
 
-    # eu_countries(db)
-    eu_parliament(db)
-    # eu_national_parliaments(db)
-    make_json()
+    # eu_wide(db, 'parliament')
+    # eu_wide(db, 'ep')
+    # eu_countries(db, 'parliament')
+    eu_countries(db, 'ep')
 
 if __name__ == '__main__':
     main()
