@@ -24,7 +24,6 @@ function init () {
             .attr("value", function (d) { return d; })
             .text(function (d) { return d; });
 
-        $('#countries').chosen();
         countrySelect.on('change', onCountrySelectChange)
 
 		update();
@@ -102,12 +101,10 @@ var renderChart = function(config) {
 	 */
 	var margins = {
 		top: 10,
-		right: 5,
-		bottom: 25,
+		right: 10,
+		bottom: 50,
 		left: 50
 	};
-
-    console.log(config['data']);
 
     var aspectRatio = 1.3;
 
@@ -146,20 +143,26 @@ var renderChart = function(config) {
 	 * Create D3 axes.
 	 */
 	var xAxis = d3.svg.axis()
-	.scale(xScale)
-	.orient('bottom')
-    .ticks(3)
-    .tickFormat(function(d, i) {
-        if (d == 0) {
-            return 'Far left';
-        } else if (d == 5) {
-            return 'Center';
-        } else if (d == 10) {
-            return 'Far right';
-        }
+    	.scale(xScale)
+    	.orient('bottom')
+        .tickValues([0, 2.5, 5, 7.5, 10])
+        .tickFormat(function(d) {
+            return d;
+        });
 
-        return d;
-    })
+    var xAxisLabels = d3.svg.axis()
+    	.scale(xScale)
+    	.orient('bottom')
+        .tickValues([0, 5, 10])
+        .tickFormat(function(d) {
+            if (d == 0) {
+                return 'Far left';
+            } else if (d == 5) {
+                return 'Center';
+            } else if (d == 10) {
+                return 'Far right';
+            }
+        });
 
 	var yAxis = d3.svg.axis()
 		.scale(yScale)
@@ -172,9 +175,27 @@ var renderChart = function(config) {
 	 * Render axes to chart.
 	 */
 	var xAxisElement = chartElement.append('g')
-		.attr('class', 'x axis')
-		.attr('transform', makeTranslate(0, chartHeight))
-		.call(xAxis);
+    		.attr('class', 'x axis')
+    		.attr('transform', makeTranslate(0, chartHeight))
+    		.call(xAxis)
+
+    var xAxisLabelsElement = chartElement.append('g')
+    		.attr('class', 'x labels')
+    		.attr('transform', makeTranslate(0, chartHeight + 20))
+    		.call(xAxisLabels)
+
+    // Align edge ticks
+    $('.x.axis .tick text').eq(0)
+        .css('text-anchor', 'start')
+
+    $('.x.labels .tick text').eq(0)
+        .css('text-anchor', 'start')
+
+    $('.x.axis .tick text').eq(-1)
+        .css('text-anchor', 'end')
+
+    $('.x.labels .tick text').eq(-1)
+        .css('text-anchor', 'end')
 
 	var yAxisElement = chartElement.append('g')
 		.attr('class', 'y axis')
