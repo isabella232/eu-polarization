@@ -49,7 +49,8 @@ def eu_parliament(db):
     """
     Aggregate data for EU parliamentary elections.
     """
-    out_rows = []
+    summary_rows = []
+    detail_rows = []
 
     for year in EU_ELECTIONS_YEARS:
         left_right_list = []
@@ -66,7 +67,7 @@ def eu_parliament(db):
             )
 
             for row in results:
-                name, seats, left_right = row
+                party_name, seats, left_right = row
 
                 if not seats:
                     continue
@@ -78,23 +79,32 @@ def eu_parliament(db):
 
                 left_right_list.extend([left_right] * seats)
 
+                for i in range(seats):
+                    detail_rows.append([year, country, party_name, left_right])
+
         seats_with_score = len(left_right_list)
         mean_score = statistics.mean(left_right_list)
         median_score = statistics.median(left_right_list)
         stdev_score = statistics.stdev(left_right_list)
 
-        out_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
+        summary_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
 
     with open('output/eu_parliament.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
-        writer.writerows(out_rows)
+        writer.writerows(summary_rows)
+
+    with open('output/eu_parliament_details.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['year', 'country', 'party_name', 'left_right'])
+        writer.writerows(detail_rows)
 
 def eu_national_parliaments(db):
     """
     Aggregate data for all EU member-country national parliaments, as a group.
     """
-    out_rows = []
+    summary_rows = []
+    detail_rows = []
 
     for year in range(1980, 2016):
         left_right_list = []
@@ -128,7 +138,7 @@ def eu_national_parliaments(db):
             )
 
             for row in results:
-                name, seats, left_right = row
+                party_name, seats, left_right = row
 
                 if not seats:
                     continue
@@ -140,17 +150,25 @@ def eu_national_parliaments(db):
 
                 left_right_list.extend([left_right] * seats)
 
+                for i in range(seats):
+                    detail_rows.append([year, country, party_name, left_right])
+
         seats_with_score = len(left_right_list)
         mean_score = statistics.mean(left_right_list)
         median_score = statistics.median(left_right_list)
         stdev_score = statistics.stdev(left_right_list)
 
-        out_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
+        summary_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
 
-    with open('eu_national_parliaments.csv', 'w') as f:
+    with open('output/eu_national_parliaments.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
-        writer.writerows(out_rows)
+        writer.writerows(summary_rows)
+
+    with open('output/eu_national_parliaments_details.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['year', 'country', 'party_name', 'left_right'])
+        writer.writerows(detail_rows)
 
 def eu_countries(db):
     """
@@ -201,7 +219,7 @@ def eu_countries(db):
 
                 out_rows.append([country, election_date, seats_with_score, seats_total, mean_score, median_score, stdev_score])
 
-        with open('eu_countries_%s.csv' % election_type, 'w') as f:
+        with open('output/eu_countries_%s.csv' % election_type, 'w') as f:
             writer = csv.writer(f)
             writer.writerow(['country', 'election_date', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev'])
             writer.writerows(out_rows)
@@ -209,9 +227,9 @@ def eu_countries(db):
 def main():
     db = sqlite.connect('data/parlgov-stable.db')
 
-    eu_countries(db)
+    # eu_countries(db)
     eu_parliament(db)
-    eu_national_parliaments(db)
+    # eu_national_parliaments(db)
 
 if __name__ == '__main__':
     main()
