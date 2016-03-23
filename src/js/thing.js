@@ -24,6 +24,7 @@ function init () {
             .attr("value", function (d) { return d; })
             .text(function (d) { return d; });
 
+        $('#countries').chosen();
         countrySelect.on('change', onCountrySelectChange)
 
 		update();
@@ -108,7 +109,7 @@ var renderChart = function(config) {
 
     console.log(config['data']);
 
-    var aspectRatio = 1.2;
+    var aspectRatio = 1.3;
 
 	// Calculate actual chart dimensions
 	var chartWidth = config['width'] - margins['left'] - margins['right'];
@@ -135,7 +136,7 @@ var renderChart = function(config) {
 	 */
 	var xScale = d3.scale.linear()
 		.range([0, chartWidth])
-		.domain([2, 8]);
+		.domain([0, 10]);
 
 	var yScale = d3.scale.linear()
 		.range([chartHeight, 0])
@@ -147,7 +148,18 @@ var renderChart = function(config) {
 	var xAxis = d3.svg.axis()
 	.scale(xScale)
 	.orient('bottom')
-    .ticks(5)
+    .ticks(3)
+    .tickFormat(function(d, i) {
+        if (d == 0) {
+            return 'Far left';
+        } else if (d == 5) {
+            return 'Center';
+        } else if (d == 10) {
+            return 'Far right';
+        }
+
+        return d;
+    })
 
 	var yAxis = d3.svg.axis()
 		.scale(yScale)
@@ -214,18 +226,18 @@ var renderChart = function(config) {
             ]);
         });
 
-    chartElement.append('text')
-        .attr('class', 'left')
-        .attr('x', xScale(4.5))
-        .attr('y', yScale(1982))
-        .attr('text-anchor', 'end')
-        .text('◀ Political left');
-
-    chartElement.append('text')
-        .attr('class', 'left')
-        .attr('x', xScale(5.5))
-        .attr('y', yScale(1982))
-        .text('Political right ▶');
+    // chartElement.append('text')
+    //     .attr('class', 'left')
+    //     .attr('x', xScale(4.5))
+    //     .attr('y', yScale(1982))
+    //     .attr('text-anchor', 'end')
+    //     .text('◀ Political left');
+    //
+    // chartElement.append('text')
+    //     .attr('class', 'left')
+    //     .attr('x', xScale(5.5))
+    //     .attr('y', yScale(1982))
+    //     .text('Political right ▶');
 
     chartElement.append('g')
         .attr('class', 'lines')

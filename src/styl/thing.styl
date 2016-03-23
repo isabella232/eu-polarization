@@ -1,3 +1,6 @@
+#chart
+    padding-bottom: 20px
+
 ul#legend
   margin-left: 0
   padding: 0
@@ -8,19 +11,19 @@ ul#legend
     display: inline-block
     margin: 0 18px 0 0
     padding: 0
-    line-height: 15px
+    line-height: 16px
 
     b
       display: inline-block
-      width: 15px
-      height: 15px
+      width: 16px
+      height: 16px
       margin-right: 6px
       float: left
 
     div
       whitespace: nowrap
       fill: $qz-gray-2
-      font-size: 12px
+      font-size: 14px
       font-family: 'AdelleSans-Regular', Helvetica, Arial, sans-serif
       float: left;
 
@@ -29,6 +32,13 @@ ul#legend
 
      &.ep_mean b
         background-color: $qz-blue-3
+
+.x.axis
+    .tick:first-child text
+        text-anchor: start !important
+
+    .tick:last-child text
+        text-anchor: end !important
 
 .lines path
     stroke-width: 3px
