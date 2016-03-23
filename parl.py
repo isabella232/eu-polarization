@@ -45,7 +45,10 @@ EU_ELECTIONS_YEARS = [
     1979, 1984, 1989, 1994, 1999, 2004, 2009, 2014
 ]
 
-def eu(db):
+def eu_parliament(db):
+    """
+    Aggregate data for EU parliamentary elections.
+    """
     out_rows = []
 
     for year in EU_ELECTIONS_YEARS:
@@ -82,12 +85,15 @@ def eu(db):
 
         out_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
 
-    with open('eu_total.csv', 'w') as f:
+    with open('output/eu_parliament.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
         writer.writerows(out_rows)
 
-def eu_region(db):
+def eu_national_parliaments(db):
+    """
+    Aggregate data for all EU member-country national parliaments, as a group.
+    """
     out_rows = []
 
     for year in range(1980, 2016):
@@ -141,12 +147,15 @@ def eu_region(db):
 
         out_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
 
-    with open('eu_region.csv', 'w') as f:
+    with open('eu_national_parliaments.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
         writer.writerows(out_rows)
 
-def countries(db):
+def eu_countries(db):
+    """
+    Aggregate data for individual EU member-country national parliaments.
+    """
     for election_type in ELECTION_TYPES:
         print(election_type)
 
@@ -192,17 +201,17 @@ def countries(db):
 
                 out_rows.append([country, election_date, seats_with_score, seats_total, mean_score, median_score, stdev_score])
 
-        with open('%s.csv' % election_type, 'w') as f:
+        with open('eu_countries_%s.csv' % election_type, 'w') as f:
             writer = csv.writer(f)
             writer.writerow(['country', 'election_date', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev'])
             writer.writerows(out_rows)
 
 def main():
-    db = sqlite.connect('parlgov-stable.db')
+    db = sqlite.connect('data/parlgov-stable.db')
 
-    # countries(db)
-    eu(db)
-    # eu_region(db)
+    eu_countries(db)
+    eu_parliament(db)
+    eu_national_parliaments(db)
 
 if __name__ == '__main__':
     main()
