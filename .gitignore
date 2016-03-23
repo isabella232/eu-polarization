@@ -2,4 +2,7 @@
 output
 .DS_Store
 .proof
-data
+./data
+.tmp
+build
+node_modules

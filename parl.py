@@ -45,6 +45,7 @@ EU_ELECTIONS_YEARS = [
     1979, 1984, 1989, 1994, 1999, 2004, 2009, 2014
 ]
 
+
 def eu_parliament(db):
     """
     Aggregate data for EU parliamentary elections.
@@ -98,6 +99,7 @@ def eu_parliament(db):
         writer = csv.writer(f)
         writer.writerow(['year', 'country', 'party_name', 'left_right'])
         writer.writerows(detail_rows)
+
 
 def eu_national_parliaments(db):
     """
@@ -170,6 +172,7 @@ def eu_national_parliaments(db):
         writer.writerow(['year', 'country', 'party_name', 'left_right'])
         writer.writerows(detail_rows)
 
+
 def eu_countries(db):
     """
     Aggregate data for individual EU member-country national parliaments.
@@ -224,12 +227,18 @@ def eu_countries(db):
             writer.writerow(['country', 'election_date', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev'])
             writer.writerows(out_rows)
 
+
+def make_json():
+    pass
+
+
 def main():
     db = sqlite.connect('data/parlgov-stable.db')
 
     # eu_countries(db)
     eu_parliament(db)
     # eu_national_parliaments(db)
+    make_json()
 
 if __name__ == '__main__':
     main()
