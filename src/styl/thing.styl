@@ -1,3 +1,8 @@
+#interactive-content h3
+    font-family: $qz-sans
+    font-size: 20px
+    font-weight: 400
+
 #chart
     padding-bottom: 20px
 
@@ -11,27 +16,34 @@ ul#legend
     display: inline-block
     margin: 0 18px 0 0
     padding: 0
-    line-height: 16px
+    line-height: 20px
 
     b
       display: inline-block
-      width: 16px
-      height: 16px
+      width: 12px
+      height: 12px
+      margin-top: 4px
       margin-right: 6px
       float: left
 
     div
       whitespace: nowrap
       fill: $qz-gray-2
-      font-size: 14px
-      font-family: 'AdelleSans-Regular', Helvetica, Arial, sans-serif
+      font-size: 20px
+      font-family: $qz-sans-light
       float: left;
 
-    &.parliament_mean b
-      background-color: $qz-purp-3
+    &.parliament_mean
+        b
+            background-color: $qz-purp-3
+        div
+            color: $qz-purp-3
 
-     &.ep_mean b
-        background-color: $qz-blue-3
+     &.ep_mean
+        b
+            background-color: $qz-blue-1
+        div
+            color: $qz-blue-1
 
 .lines path
     stroke-width: 3px
@@ -41,7 +53,7 @@ ul#legend
         stroke: $qz-purp-3
 
     &.ep_mean
-        stroke: $qz-blue-3
+        stroke: $qz-blue-1
 
 .zero-line
     stroke: $qz-gray-3

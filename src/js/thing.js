@@ -156,11 +156,11 @@ var renderChart = function(config) {
         .tickValues([0, 5, 10])
         .tickFormat(function(d) {
             if (d == 0) {
-                return 'Far left';
+                return 'Extreme left';
             } else if (d == 5) {
                 return 'Center';
             } else if (d == 10) {
-                return 'Far right';
+                return 'Extreme right';
             }
         });
 
