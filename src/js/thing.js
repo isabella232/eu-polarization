@@ -6,7 +6,6 @@ var request = require('d3-request');
 var _ = require('lodash');
 
 var MOBILE_THRESHOLD = 600;
-var IS_ALL_PAGE = (location.pathname == '/all.html');
 
 var chartData = null;
 var countrySelect = null;
