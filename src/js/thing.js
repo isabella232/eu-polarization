@@ -9,7 +9,7 @@ var MOBILE_THRESHOLD = 600;
 
 var chartData = null;
 var countrySelect = null;
-var currentChart = 'Austria';
+var currentChart = 'United Kingdom';
 
 function init () {
     d3.json('./data/countries.json', function(err, data) {
@@ -22,6 +22,13 @@ function init () {
             .enter()
             .append("option")
             .attr("value", function (d) { return d; })
+            .attr('selected', function(d) {
+                if (d == 'United Kingdom') {
+                    return 'selected';
+                }
+
+                return null;
+            })
             .text(function (d) { return d; });
 
         countrySelect.on('change', onCountrySelectChange)
