@@ -6,44 +6,35 @@ var request = require('d3-request');
 var _ = require('lodash');
 
 var MOBILE_THRESHOLD = 600;
-var IS_ALL_PAGE = (location.pathname == '/all.html');
 
 var chartData = null;
 var countrySelect = null;
 var currentChart = 'United Kingdom';
 
 function init () {
-    if (IS_ALL_PAGE) {
-        d3.json('./data/eu.json', function(err, data) {
-            chartData = data;
+    d3.json('./data/countries.json', function(err, data) {
+		chartData = data;
 
-            update();
-        });
-    } else {
-        d3.json('./data/countries.json', function(err, data) {
-    		chartData = data;
+        countrySelect = d3.select('#countries');
 
-            countrySelect = d3.select('#countries');
+        countrySelect.selectAll("option")
+            .data(d3.keys(chartData))
+            .enter()
+            .append("option")
+            .attr("value", function (d) { return d; })
+            .attr('selected', function(d) {
+                if (d == 'United Kingdom') {
+                    return 'selected';
+                }
 
-            countrySelect.selectAll("option")
-                .data(d3.keys(chartData))
-                .enter()
-                .append("option")
-                .attr("value", function (d) { return d; })
-                .attr('selected', function(d) {
-                    if (d == 'United Kingdom') {
-                        return 'selected';
-                    }
+                return null;
+            })
+            .text(function (d) { return d; });
 
-                    return null;
-                })
-                .text(function (d) { return d; });
+        countrySelect.on('change', onCountrySelectChange)
 
-            countrySelect.on('change', onCountrySelectChange)
-
-    		update();
-    	});
-    }
+		update();
+	});
 }
 
 var onCountrySelectChange = function() {
@@ -94,18 +85,10 @@ function update () {
 		isMobile = false;
 	}
 
-    var data = null;
-
-    if (IS_ALL_PAGE) {
-        data = chartData;
-    } else {
-        data = chartData[currentChart];
-    }
-
 	renderChart({
 		container: '#chart',
 		width: width,
-		data: formatData(data)
+		data: formatData(chartData[currentChart])
 	});
 
 	// adjust iframe for dynamic content

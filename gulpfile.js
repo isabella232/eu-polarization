@@ -106,11 +106,19 @@ gulp.task("get-content", function(cb) {
 
 // Jade and Stylus for html, css
 gulp.task("jade", ["preprocess","get-content"], function () {
-  return gulp.src(config.paths.tmp.jade + "/index.jade")
+  return gulp.src([config.paths.tmp.jade + "/index.jade", config.paths.tmp.jade + "/all.jade"])
     .pipe(jade({ pretty: true, locals: content }))
     .pipe(gulp.dest(config.dirs.build))
     .pipe(reload({ stream: true }));
 });
+
+// // Jade and Stylus for html, css
+// gulp.task("jade", ["preprocess","get-content"], function () {
+//   return gulp.src(config.paths.tmp.jade + "/all.jade")
+//     .pipe(jade({ pretty: true, locals: content }))
+//     .pipe(gulp.dest(config.dirs.build))
+//     .pipe(reload({ stream: true }));
+// });
 
 gulp.task("stylus", ["preprocess"], function () {
   return gulp.src(config.paths.tmp.styl + "/main.styl")
@@ -211,4 +219,3 @@ if (args.build) {
     gulp.start("browser-sync");
   });
 }
-
