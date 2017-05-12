@@ -48,6 +48,11 @@ EU_ELECTIONS_YEARS = [
 START_YEAR = 1980
 END_YEAR = 2015
 
+FAR_LEFT = 2.5
+CENTER_LEFT = 4
+CENTER_RIGHT = 6
+FAR_RIGHT = 7.5
+
 
 def eu_wide(db, election_type):
     """
@@ -58,6 +63,9 @@ def eu_wide(db, election_type):
 
     for year in range(START_YEAR, END_YEAR + 1):
         left_right_list = []
+        far_left = 0
+        far_right = 0
+        center = 0
         total_seats = 0
 
         print(year)
@@ -102,6 +110,13 @@ def eu_wide(db, election_type):
 
                 left_right_list.extend([left_right] * seats)
 
+                if left_right < FAR_LEFT:
+                    far_left += seats
+                elif CENTER_LEFT < left_right < CENTER_RIGHT:
+                    center += seats
+                elif left_right > FAR_RIGHT:
+                    far_right += seats
+
                 for i in range(seats):
                     detail_rows.append([year, country, party_name, family_name, left_right])
 
@@ -110,11 +125,11 @@ def eu_wide(db, election_type):
         median_score = statistics.median(left_right_list)
         stdev_score = statistics.stdev(left_right_list)
 
-        summary_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score])
+        summary_rows.append([year, seats_with_score, total_seats, mean_score, median_score, stdev_score, far_left, center, far_right])
 
     with open('output/eu_wide_%s.csv' % election_type, 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev'])
+        writer.writerow(['year', 'seats_with_score', 'total_seats', 'mean', 'median', 'stdev', 'far_left', 'center', 'far_right'])
         writer.writerows(summary_rows)
 
     with open('output/eu_details_%s.csv' % election_type, 'w') as f:
@@ -230,6 +245,9 @@ def eu_countries(db, election_type):
             )
 
             left_right_list = []
+            far_left = 0
+            far_right = 0
+            center = 0
 
             for row in results:
                 name, seats, seats_total, left_right = row
@@ -242,16 +260,23 @@ def eu_countries(db, election_type):
 
                 left_right_list.extend([left_right] * seats)
 
+                if left_right < FAR_LEFT:
+                    far_left += seats
+                elif CENTER_LEFT < left_right < CENTER_RIGHT:
+                    center += seats
+                elif left_right > FAR_RIGHT:
+                    far_right += seats
+
             seats_with_score = len(left_right_list)
             mean_score = statistics.mean(left_right_list)
             median_score = statistics.median(left_right_list)
             stdev_score = statistics.stdev(left_right_list)
 
-            out_rows.append([country, year, seats_with_score, seats_total, mean_score, median_score, stdev_score])
+            out_rows.append([country, year, seats_with_score, seats_total, mean_score, median_score, stdev_score, far_left, center, far_right])
 
     with open('output/eu_countries_%s.csv' % election_type, 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(['country', 'year', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev'])
+        writer.writerow(['country', 'year', 'seats_with_score', 'seats_total', 'mean', 'median', 'stdev', 'far_left', 'center', 'far_right'])
         writer.writerows(out_rows)
 
 
@@ -317,10 +342,10 @@ def main():
     db = sqlite.connect('file:data/parlgov-stable.db?mode=ro')
 
     eu_wide(db, 'parliament')
-    eu_wide(db, 'ep')
+    # eu_wide(db, 'ep')
     # eu_wide_cabinet(db)
     # eu_countries_cabinet(db)
-    # eu_countries(db, 'parliament')
+    eu_countries(db, 'parliament')
     # eu_countries(db, 'ep')
 
 if __name__ == '__main__':

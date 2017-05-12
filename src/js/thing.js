@@ -238,17 +238,6 @@ var renderChart = function(config) {
  			.tickFormat('')
  		);
 
-	var yAxisGrid = function() {
-		return yAxis;
-	};
-
-	yAxisElement.append('g')
-		.attr('class', 'y grid')
-		.call(yAxisGrid()
-			.tickSize(-chartWidth, 0)
-			.tickFormat('')
-		);
-
 	/*
 	 * Render lines to chart.
 	 */
